@@ -1,5 +1,5 @@
 /*!
- * Layzr.js 1.4.2 - A small, fast, modern, and dependency-free library for lazy loading.
+ * Layzr.js 1.5.0 - A small, fast, modern, and dependency-free library for lazy loading.
  * Copyright (c) 2015 Michael Cavalea - http://callmecavs.github.io/layzr.js/
  * License: MIT
  */
@@ -15,160 +15,111 @@
 }(this, function() {
 'use strict';
 
-// CONSTRUCTOR
-
 function Layzr(options) {
-  // debounce
-  this._lastScroll = 0;
-  this._ticking    = false;
-
-  // options
   options = options || {};
 
-  this._optionsContainer  = document.querySelector(options.container) || window;
-  this._optionsSelector   = options.selector || '[data-layzr]';
-  this._optionsAttr       = options.attr || 'data-layzr';
-  this._optionsAttrRetina = options.retinaAttr || 'data-layzr-retina';
-  this._optionsAttrBg     = options.bgAttr || 'data-layzr-bg';
-  this._optionsAttrHidden = options.hiddenAttr || 'data-layzr-hidden';
-  this._optionsThreshold  = options.threshold || 0;
-  this._optionsCallback   = options.callback || null;
+  this.container  = document.querySelector(options.container) || window;
+  this.selector   = options.selector || '[data-layzr]';
+  this.attr       = options.attr || 'data-layzr';
+  this.retinaAttr = options.retinaAttr || 'data-layzr-retina';
+  this.bgAttr     = options.bgAttr || 'data-layzr-bg';
+  this.hiddenAttr = options.hiddenAttr || 'data-layzr-hidden';
+  this.threshold  = options.threshold || 0;
+  this.callback   = options.callback || null;
 
-  // properties
-  this._retina  = window.devicePixelRatio > 1;
-  this._srcAttr = this._retina ? this._optionsAttrRetina : this._optionsAttr;
+  window.devicePixelRatio > 1
+    ? this.src = this.retinaAttr
+    : this.src = this.attr;
 
-  // nodelist
-  this._nodes = document.querySelectorAll(this._optionsSelector);
+  this.prevLoc = 0;
+  this.ticking = false;
 
-  // scroll and resize handler
-  this._handlerBind = this._requestScroll.bind(this);
+  this.handlers = this._requestLocation.bind(this);
+  this.elements = this._getElements();
 
-  // call to create
   this._create();
 }
 
-// DEBOUNCE HELPERS
-// adapted from: http://www.html5rocks.com/en/tutorials/speed/animations/
+Layzr.prototype._create = function() {
+  this.handlers();
 
-Layzr.prototype._requestScroll = function() {
-  if(this._optionsContainer === window) {
-    this._lastScroll = window.pageYOffset;
-  }
-  else {
-    this._lastScroll = this._optionsContainer.scrollTop + this._getOffset(this._optionsContainer);
-  }
+  this.container.addEventListener('scroll', this.handlers, false);
+  this.container.addEventListener('resize', this.handlers, false);
+};
+
+Layzr.prototype._destroy = function() {
+  this.container.removeEventListener('scroll', this.handlers, false);
+  this.container.removeEventListener('resize', this.handlers, false);
+};
+
+Layzr.prototype._requestLocation = function() {
+  this.container === window
+    ? this.prevLoc = window.pageYOffset
+    : this.prevLoc = this.container.scrollTop + this._getOffset(this.container);
 
   this._requestTick();
 };
 
 Layzr.prototype._requestTick = function() {
-  if(!this._ticking) {
-    requestAnimationFrame(this.update.bind(this));
-    this._ticking = true;
+  if(!this.ticking) {
+    requestAnimationFrame(this._update.bind(this));
+    this.ticking = true;
   }
 };
 
-// OFFSET HELPER
-// remember, getBoundingClientRect is relative to the viewport
-
-Layzr.prototype._getOffset = function(node) {
-  return node.getBoundingClientRect().top + window.pageYOffset;
+Layzr.prototype._getElements = function() {
+  return Array.prototype.slice.call(document.querySelectorAll(this.selector));
 };
 
-// HEIGHT HELPER
-
-Layzr.prototype._getContainerHeight = function() {
-  return this._optionsContainer.innerHeight
-      || this._optionsContainer.offsetHeight;
-}
-
-// LAYZR METHODS
-
-Layzr.prototype._create = function() {
-  // fire scroll event once
-  this._handlerBind();
-
-  // bind scroll and resize event
-  this._optionsContainer.addEventListener('scroll', this._handlerBind, false);
-  this._optionsContainer.addEventListener('resize', this._handlerBind, false);
+Layzr.prototype._getOffset = function(element) {
+  return element.getBoundingClientRect().top + window.pageYOffset;
 };
 
-Layzr.prototype._destroy = function() {
-  // unbind scroll and resize event
-  this._optionsContainer.removeEventListener('scroll', this._handlerBind, false);
-  this._optionsContainer.removeEventListener('resize', this._handlerBind, false);
+Layzr.prototype._inViewport = function(element) {
+  var containerHeight = this.container.innerHeight || this.container.offsetHeight;
+
+  console.log(this.container.scrollTop);
+
+  var viewportTop = this.prevLoc;
+  var viewportBottom = viewportTop + containerHeight;
+
+  var elementTop = this._getOffset(element);
+  var elementBottom = elementTop + containerHeight;
+
+  var threshold = (this.threshold / 100) * containerHeight;
+
+  return elementBottom >= viewportTop - threshold
+      && elementTop <= viewportBottom + threshold
+      && !element.hasAttribute(this.hiddenAttr);
 };
 
-Layzr.prototype._inViewport = function(node) {
-  // get viewport top and bottom offset
-  var viewportTop = this._lastScroll;
-  var viewportBottom = viewportTop + this._getContainerHeight();
+Layzr.prototype._reveal = function(element) {
+  var source = element.getAttribute(this.src) || element.getAttribute(this.attr);
 
-  // get node top and bottom offset
-  var nodeTop = this._getOffset(node);
-  var nodeBottom = nodeTop + this._getContainerHeight();
+  element.hasAttribute(this.bgAttr)
+    ? element.style.backgroundImage = 'url("' + source + '")'
+    : element.setAttribute('src', source);
 
-  // calculate threshold, convert percentage to pixel value
-  var threshold = (this._optionsThreshold / 100) * window.innerHeight;
-
-  // return if node in viewport
-  return nodeBottom >= viewportTop - threshold
-      && nodeTop <= viewportBottom + threshold
-      && !node.hasAttribute(this._optionsAttrHidden);
-};
-
-Layzr.prototype._reveal = function(node) {
-  // get node source
-  var source = node.getAttribute(this._srcAttr) || node.getAttribute(this._optionsAttr);
-
-  // set node src or bg image
-  if(node.hasAttribute(this._optionsAttrBg)) {
-    node.style.backgroundImage = 'url(' + source + ')';
-  }
-  else {
-    node.setAttribute('src', source);
+  if(typeof this.callback === 'function') {
+    this.callback.call(element);
   }
 
-  // call the callback
-  if(typeof this._optionsCallback === 'function') {
-    // "this" will be the node in the callback
-    this._optionsCallback.call(node);
-  }
+  element.removeAttribute(this.attr);
+  element.removeAttribute(this.retinaAttr);
+  element.removeAttribute(this.bgAttr);
+  element.removeAttribute(this.hiddenAttr);
 
-  // remove node data attributes
-  node.removeAttribute(this._optionsAttr);
-  node.removeAttribute(this._optionsAttrRetina);
-  node.removeAttribute(this._optionsAttrBg);
-  node.removeAttribute(this._optionsAttrHidden);
+  this.elements = this._getElements();
 };
 
-Layzr.prototype.updateSelector = function() {
-  // update cached list of nodes matching selector
-  this._nodes = document.querySelectorAll(this._optionsSelector);
-};
-
-Layzr.prototype.update = function() {
-  // cache nodelist length
-  var nodesLength = this._nodes.length;
-
-  // loop through nodes
-  for(var i = 0; i < nodesLength; i++) {
-    // cache node
-    var node = this._nodes[i];
-
-    // check if node has mandatory attribute
-    if(node.hasAttribute(this._optionsAttr)) {
-      // check if node in viewport
-      if(this._inViewport(node)) {
-        // reveal node
-        this._reveal(node);
-      }
+Layzr.prototype._update = function() {
+  this.elements.forEach(function(element) {
+    if(this._inViewport(element)) {
+      this._reveal(element);
     }
-  }
+  }.bind(this));
 
-  // allow for more animation frames
-  this._ticking = false;
+  this.ticking = false;
 };
 
 return Layzr;
