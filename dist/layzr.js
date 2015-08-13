@@ -76,17 +76,13 @@ Layzr.prototype._getOffset = function(element) {
 };
 
 Layzr.prototype._inViewport = function(element) {
-  var containerHeight = this.container.innerHeight || this.container.offsetHeight;
-
-  console.log(this.container.scrollTop);
-
   var viewportTop = this.prevLoc;
-  var viewportBottom = viewportTop + containerHeight;
+  var viewportBottom = viewportTop + this.containerHeight;
 
   var elementTop = this._getOffset(element);
-  var elementBottom = elementTop + containerHeight;
+  var elementBottom = elementTop + this.containerHeight;
 
-  var threshold = (this.threshold / 100) * containerHeight;
+  var threshold = (this.threshold / 100) * this.containerHeight;
 
   return elementBottom >= viewportTop - threshold
       && elementTop <= viewportBottom + threshold
@@ -117,6 +113,8 @@ Layzr.prototype._reveal = function(element) {
 };
 
 Layzr.prototype._update = function() {
+  this.containerHeight = this.container.innerHeight || this.container.offsetHeight;
+
   this.elements.forEach(function(element) {
     if(this._inViewport(element)) {
       this._reveal(element);
