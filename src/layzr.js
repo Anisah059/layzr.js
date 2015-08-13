@@ -53,7 +53,13 @@ Layzr.prototype._requestTick = function() {
 };
 
 Layzr.prototype._getElements = function() {
-  return Array.prototype.slice.call(document.querySelectorAll(this.selector));
+  var elements;
+
+  this.container === window
+    ? elements = document.querySelectorAll(this.selector)
+    : elements = this.container.querySelectorAll(this.selector)
+
+  return Array.prototype.slice.call(elements);
 };
 
 Layzr.prototype._getOffset = function(element) {
