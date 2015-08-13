@@ -63,7 +63,13 @@ Layzr.prototype._getElements = function() {
 };
 
 Layzr.prototype._getOffset = function(element) {
-  return element.getBoundingClientRect().top + window.pageYOffset;
+  var offset;
+
+  this.container === window
+    ? offset = element.getBoundingClientRect().top + window.pageYOffset
+    : offset = element.offsetTop - element.parentNode.offsetTop;
+
+  return offset;
 };
 
 Layzr.prototype._inViewport = function(element) {
