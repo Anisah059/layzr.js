@@ -91,8 +91,7 @@ Layzr.prototype._inViewport = function(element) {
   var threshold = (this.threshold / 100) * this.containerHeight;
 
   return elementBottom >= viewportTop - threshold
-      && elementTop <= viewportBottom + threshold
-      && !element.hasAttribute(this.hiddenAttr);
+      && elementTop <= viewportBottom + threshold;
 };
 
 Layzr.prototype._reveal = function(element) {
@@ -122,7 +121,7 @@ Layzr.prototype._update = function() {
   this.containerHeight = this.container.innerHeight || this.container.offsetHeight;
 
   this.elements.forEach(function(element) {
-    if(this._inViewport(element)) {
+    if(!element.hasAttribute(this.hiddenAttr) && this._inViewport(element)) {
       this._reveal(element);
     }
   }.bind(this));
