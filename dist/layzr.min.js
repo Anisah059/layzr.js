@@ -1,5 +1,5 @@
 /*!
- * Layzr.js 1.5.0 - A small, fast, modern, and dependency-free library for lazy loading.
+ * Layzr.js 2.0.0 - A small, fast, modern, and dependency-free library for lazy loading.
  * Copyright (c) 2015 Michael Cavalea - http://callmecavs.github.io/layzr.js/
  * License: MIT
  */
