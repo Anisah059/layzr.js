@@ -95,6 +95,10 @@ Layzr.prototype._reveal = function(element) {
   element.removeAttribute(this.hiddenAttr);
 
   this.elements = this._getElements();
+
+  if(this.elements.length === 0) {
+    this._destroy();
+  }
 };
 
 Layzr.prototype._update = function() {
