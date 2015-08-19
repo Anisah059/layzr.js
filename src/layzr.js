@@ -52,23 +52,15 @@ Layzr.prototype._requestTick = function() {
 };
 
 Layzr.prototype._getElements = function() {
-  var elements;
-
-  this.container === window
-    ? elements = document.querySelectorAll(this.selector)
-    : elements = this.container.querySelectorAll(this.selector)
-
-  return Array.prototype.slice.call(elements);
+  return this.container === window
+    ? Array.prototype.slice.call(document.querySelectorAll(this.selector))
+    : Array.prototype.slice.call(this.container.querySelectorAll(this.selector))
 };
 
 Layzr.prototype._getOffset = function(element) {
-  var offset;
-
-  this.container === window
-    ? offset = element.getBoundingClientRect().top + window.pageYOffset
-    : offset = element.offsetTop - element.parentNode.offsetTop;
-
-  return offset;
+  return this.container === window
+    ? element.getBoundingClientRect().top + window.pageYOffset
+    : element.offsetTop - element.parentNode.offsetTop;
 };
 
 Layzr.prototype._inViewport = function(element) {
