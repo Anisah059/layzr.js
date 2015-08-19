@@ -1,6 +1,8 @@
 # Layzr.js
 
-[![Layzr.js on NPM](https://img.shields.io/npm/v/layzr.js.svg)](https://www.npmjs.com/package/layzr.js) [![Layzr.js on Bower](https://img.shields.io/bower/v/layzr.js.svg)](http://bower.io/search/?q=layzr.js) [![Layzr.js on Gitter](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/callmecavs/layzr.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Layzr.js on NPM](https://img.shields.io/npm/v/layzr.js.svg)](https://www.npmjs.com/package/layzr.js)
+[![Layzr.js on Bower](https://img.shields.io/bower/v/layzr.js.svg)](http://bower.io/search/?q=layzr.js)
+[![Layzr.js on Gitter](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/callmecavs/layzr.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 A small, fast, modern, and dependency-free library for lazy loading.
 
@@ -12,9 +14,10 @@ Lazy loading boosts page speed by deferring the loading of images until they're 
 
 Follow these steps:
 
-1. [Install](https://github.com/callmecavs/layzr.js#install)
-2. [Image Setup](https://github.com/callmecavs/layzr.js#image-setup)
-3. [Instance Creation](https://github.com/callmecavs/layzr.js#instance-creation)
+1. [Install](#install)
+2. [Element Setup](#element-setup)
+3. [Instance Creation](#instance-creation)
+4. [`start` & `continue`]()
 
 ### Install
 
@@ -30,7 +33,7 @@ Load the script.
 
 The script is also available via CDN.
 
-In the examples below, replace `{version}` with your desired version. Refer to the [releases](https://github.com/callmecavs/layzr.js/releases) page for version info.
+Replace `{version}` with your desired [release](https://github.com/callmecavs/layzr.js/releases) in the following:
 
 ##### [cdnjs](https://cdnjs.com/libraries/layzr.js)
 ```html
@@ -42,38 +45,42 @@ In the examples below, replace `{version}` with your desired version. Refer to t
 <script src="https://cdn.jsdelivr.net/layzr.js/{version}/layzr.min.js"></script>
 ```
 
-### Image Setup
+### Element Setup
 
-For each `img` and/or `iframe` you want to lazy load, put the `src` in the `data-layzr` attribute.
+Use the `data-layzr` attribute to include the source for each `img` and `iframe` to lazy load.
 
 ```html
 <img data-layzr="image/source">
 <iframe data-layzr="media/source"></iframe>
 ```
 
-This is the only _required_ attribute. Advanced, _optional_ configuration follows:
+This is the only _required_ setup. Advanced, _optional_ setup follows.
 
-#### (Optional) Placeholders
+* [Placeholders](#placeholders)
+* [Retina Support](#retina-support)
+* [Background Images](#background-images)
 
-Include a placeholder, via the `src` attribute.
+#### Placeholders
 
-Images without a placeholder - _before_ they're loaded - may impact layout (no width/height), or appear broken.
+Use the `src` attribute to include a placeholder.
+
+_Before_ they load, elements without a placeholder may impact layout - have no width/height, appear broken, etc.
 
 ```html
 <img src="optional/placeholder" data-layzr="image/source">
 ```
 
-#### (Optional) Retina Support
+#### Retina Support
 
-Include a retina (high-resolution) version of the image in the `data-layzr-retina` attribute. This source will only be loaded if the [devicePixelRatio](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio) is greater than 1.
+Use the `data-layzr-retina` attribute to include a retina version of the image if the [devicePixelRatio](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio) is greater than 1.
 
-Ensure the proper CSS is in place to display both regular and retina images correctly. This library handles the loading, but not the displaying, of elements.
+Ensure the proper CSS is in place to display both regular and retina images correctly.
 
 ```html
 <img data-layzr="image/source" data-layzr-retina="optional/retina/source">
 ```
 
-#### (Optional) Background Images
+#### Background Images
 
 Include the `data-layzr-bg` attribute to load the source as a background image.
 
