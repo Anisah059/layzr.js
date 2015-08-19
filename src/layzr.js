@@ -18,22 +18,43 @@ function Layzr(options) {
   this.prevLoc = 0;
   this.ticking = false;
 
-  this.handlers = this._requestLocation.bind(this);
-  this.elements = this._getElements();
+  this.eventsBound   = false;
+  this.eventsHandler = this._requestLocation.bind(this);
 
-  this._create();
+  this.elements = [];
 }
 
-Layzr.prototype._create = function() {
-  this.handlers();
+Layzr.prototype.start =
+Layzr.prototype.continue = function(selector, overwrite) {
+  // get new elements
+  var newElements = this._getElements(selector);
 
-  this.container.addEventListener('scroll', this.handlers, false);
-  this.container.addEventListener('resize', this.handlers, false);
+  // update or overwrite existing elements
+  overwrite
+    ? this.elements = newElements
+    : this.elements = this.elements.concat(newElements);
+
+  // bind events, if needed
+  if(!this.eventsBound) {
+    this._bindEvents();
+  }
+
+  // call event handler once
+  this.eventsHandler();
+}
+
+Layzr.prototype._bindEvents = function() {
+  this.container.addEventListener('scroll', this.eventsHandler, false);
+  this.container.addEventListener('resize', this.eventsHandler, false);
+
+  this.eventsBound = true;
 };
 
-Layzr.prototype._destroy = function() {
-  this.container.removeEventListener('scroll', this.handlers, false);
-  this.container.removeEventListener('resize', this.handlers, false);
+Layzr.prototype._unbindEvents = function() {
+  this.container.removeEventListener('scroll', this.eventsHandler, false);
+  this.container.removeEventListener('resize', this.eventsHandler, false);
+
+  this.eventsBound = false;
 };
 
 Layzr.prototype._requestLocation = function() {
@@ -51,10 +72,10 @@ Layzr.prototype._requestTick = function() {
   }
 };
 
-Layzr.prototype._getElements = function() {
+Layzr.prototype._getElements = function(selector) {
   return this.container === window
-    ? Array.prototype.slice.call(document.querySelectorAll(this.selector))
-    : Array.prototype.slice.call(this.container.querySelectorAll(this.selector))
+    ? Array.prototype.slice.call(document.querySelectorAll(selector || this.selector))
+    : Array.prototype.slice.call(this.container.querySelectorAll(selector || this.selector))
 };
 
 Layzr.prototype._getOffset = function(element) {
@@ -94,7 +115,7 @@ Layzr.prototype._reveal = function(element) {
   this.elements = this._getElements();
 
   if(this.elements.length === 0) {
-    this._destroy();
+    this._unbindEvents();
   }
 };
 
