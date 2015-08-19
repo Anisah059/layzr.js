@@ -23,7 +23,6 @@ function Layzr(options) {
   this.attr       = options.attr || 'data-layzr';
   this.retinaAttr = options.retinaAttr || 'data-layzr-retina';
   this.bgAttr     = options.bgAttr || 'data-layzr-bg';
-  this.hiddenAttr = options.hiddenAttr || 'data-layzr-hidden';
   this.threshold  = options.threshold || 0;
   this.callback   = options.callback || null;
 
@@ -114,7 +113,6 @@ Layzr.prototype._reveal = function(element) {
   element.removeAttribute(this.attr);
   element.removeAttribute(this.retinaAttr);
   element.removeAttribute(this.bgAttr);
-  element.removeAttribute(this.hiddenAttr);
 
   this.elements = this._getElements();
 
@@ -127,7 +125,7 @@ Layzr.prototype._update = function() {
   this.containerHeight = this.container.innerHeight || this.container.offsetHeight;
 
   this.elements.forEach(function(element) {
-    if(!element.hasAttribute(this.hiddenAttr) && this._inViewport(element)) {
+    if(this._inViewport(element)) {
       this._reveal(element);
     }
   }.bind(this));
