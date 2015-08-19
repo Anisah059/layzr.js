@@ -11,9 +11,9 @@ function Layzr(options) {
   this.threshold  = options.threshold || 0;
   this.callback   = options.callback || null;
 
-  window.devicePixelRatio > 1
-    ? this.src = this.retinaAttr
-    : this.src = this.attr;
+  this.src = window.devicePixelRatio > 1
+    ? this.retinaAttr
+    : this.attr;
 
   this.prevLoc = 0;
   this.ticking = false;
