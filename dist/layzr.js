@@ -21,6 +21,8 @@
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+  function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
   var Layzr = (function () {
@@ -33,8 +35,7 @@
 
       // options
       this.selector = options.selector || '[data-layzr]';
-      this.normalAttr = options.normalAttr || 'data-layzr';
-      this.retinaAttr = options.retinaAttr || 'data-layzr-retina';
+      this.srcsetAttr = options.srcsetAttr || 'data-layzr';
       this.bgAttr = options.bgAttr || 'data-layzr-bg';
       this.threshold = options.threshold || 0;
       this.callback = options.callback || undefined;
@@ -120,6 +121,84 @@
         return elementOffset.top >= viewportTop - threshold && elementOffset.bottom <= viewportBottom + threshold;
       }
     }, {
+      key: '_getSource',
+      value: function _getSource(element) {
+        var _this3 = this;
+
+        var dpr = window.devicePixelRatio;
+
+        var candidates = element.getAttribute(this.srcsetAttr).split(',').map(function (candidate) {
+          return candidate.trim();
+        });
+
+        var sources = candidates.map(function (candidate) {
+          return candidate.split(' ').shift();
+        });
+
+        var ratios = candidates.map(function (candidate) {
+          var raw = candidate.split(' ').pop();
+          var px = parseInt(raw, 10);
+
+          return px / _this3.windowWidth;
+        });
+
+        var smaller = ratios.filter(function (ratio) {
+          return ratio < dpr;
+        });
+        var larger = ratios.filter(function (ratio) {
+          return ratio > dpr;
+        });
+
+        var best = larger.length > 0 ? sources[ratios.indexOf(Math.min.apply(Math, _toConsumableArray(larger)))] : sources[ratios.indexOf(Math.max.apply(Math, _toConsumableArray(smaller)))];
+
+        console.log(best);
+
+        // console.log(candidates)
+        // console.log(sources)
+        // console.log(ratios)
+
+        // const pairs   = element.getAttribute(attribute).split(', ')
+
+        // const sources = pairs.map(pair => pair.split(' ').shift())
+        // const sizes   = pairs.map(pair => parseInt(pair.split(' ').pop().slice(0, -1), 10))
+
+        // console.log(pairs)
+        // console.log(sources)
+        // console.log(sizes)
+
+        // const sources = raw.map((source) => {
+        //   const split = source.split(' ')
+
+        //   return [
+        //     split / this.windowWidth,
+        //     split.shift()
+        //   ]
+        // })
+
+        // const best = sources.reduce((test, source) => {
+
+        // }, 0)
+
+        // console.log(sources)
+
+        // const source = element
+        //   .getAttribute(this.normalAttr)
+        //   .split(', ')
+        //   .map((source) => {
+        //     const px = source.split(' ').pop()
+        //     return parseInt(px, 10)
+        //   })
+        //   .reduce((best, size, index) => {
+        //     const ratio = size / this.windowWidth
+
+        //     return ratio >= best
+        //       ? index
+        //       : best
+        //   }, 0)
+
+        // console.log(source)
+      }
+    }, {
       key: '_removeAttributes',
       value: function _removeAttributes(element) {
         for (var _len = arguments.length, attributes = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -133,13 +212,13 @@
     }, {
       key: '_reveal',
       value: function _reveal(element) {
-        var source = '';
+        var source = this._getSource(element);
 
         element.hasAttribute(this.bgAttr) ? element.style.backgroundImage = 'url("' + source + ')' : element.setAttribute('src', source);
 
         typeof this.callback === 'function' && this.callback.call(element);
 
-        this._removeAttributes(element, this.normalAttr, this.retinaAttr, this.bgAttr);
+        this._removeAttributes(element, this.srcsetAttr, this.bgAttr);
 
         this.elements = this._getElements();
         this.elements.length === 0 && this._unbindEvents();
@@ -147,11 +226,12 @@
     }, {
       key: '_update',
       value: function _update() {
-        var _this3 = this;
+        var _this4 = this;
 
+        this.windowWidth = window.innerWidth;
         this.windowHeight = window.innerHeight;
         this.elements.forEach(function (element) {
-          return _this3._inViewport(element) && _this3._reveal(element);
+          return _this4._inViewport(element) && _this4._reveal(element);
         });
 
         this.ticking = false;

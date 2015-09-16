@@ -2,8 +2,7 @@ export default class Layzr {
   constructor(options = {}) {
     // options
     this.selector = options.selector || '[data-layzr]'
-    this.normalAttr = options.normalAttr || 'data-layzr'
-    this.retinaAttr = options.retinaAttr || 'data-layzr-retina'
+    this.srcsetAttr = options.srcsetAttr || 'data-layzr'
     this.bgAttr = options.bgAttr || 'data-layzr-bg'
     this.threshold = options.threshold || 0
     this.callback = options.callback || undefined
@@ -75,12 +74,85 @@ export default class Layzr {
         && elementOffset.bottom <= viewportBottom + threshold
   }
 
+  _getSource(element) {
+    const dpr = window.devicePixelRatio
+
+    const candidates = element
+      .getAttribute(this.srcsetAttr)
+      .split(',')
+      .map(candidate => candidate.trim())
+
+    const sources = candidates.map(candidate => candidate.split(' ').shift())
+
+    const ratios = candidates.map((candidate) => {
+      const raw = candidate.split(' ').pop()
+      const px = parseInt(raw, 10)
+
+      return px / this.windowWidth
+    })
+
+    const smaller = ratios.filter(ratio => ratio < dpr)
+    const larger = ratios.filter(ratio => ratio > dpr)
+
+    const best = larger.length > 0
+      ? sources[ratios.indexOf(Math.min(...larger))]
+      : sources[ratios.indexOf(Math.max(...smaller))]
+
+    console.log(best)
+
+    // console.log(candidates)
+    // console.log(sources)
+    // console.log(ratios)
+
+    // const pairs   = element.getAttribute(attribute).split(', ')
+
+    // const sources = pairs.map(pair => pair.split(' ').shift())
+    // const sizes   = pairs.map(pair => parseInt(pair.split(' ').pop().slice(0, -1), 10))
+
+
+    // console.log(pairs)
+    // console.log(sources)
+    // console.log(sizes)
+
+    // const sources = raw.map((source) => {
+    //   const split = source.split(' ')
+
+    //   return [
+    //     split / this.windowWidth,
+    //     split.shift()
+    //   ]
+    // })
+
+    // const best = sources.reduce((test, source) => {
+
+    // }, 0)
+
+    // console.log(sources)
+
+    // const source = element
+    //   .getAttribute(this.normalAttr)
+    //   .split(', ')
+    //   .map((source) => {
+    //     const px = source.split(' ').pop()
+    //     return parseInt(px, 10)
+    //   })
+    //   .reduce((best, size, index) => {
+    //     const ratio = size / this.windowWidth
+
+    //     return ratio >= best
+    //       ? index
+    //       : best
+    //   }, 0)
+
+    // console.log(source)
+  }
+
   _removeAttributes(element, ...attributes) {
     attributes.forEach(attribute => element.removeAttribute(attribute))
   }
 
   _reveal(element) {
-    const source = '';
+    const source = this._getSource(element)
 
     element.hasAttribute(this.bgAttr)
       ? element.style.backgroundImage = 'url("' + source + ')'
@@ -88,13 +160,14 @@ export default class Layzr {
 
     typeof this.callback === 'function' && this.callback.call(element)
 
-    this._removeAttributes(element, this.normalAttr, this.retinaAttr, this.bgAttr)
+    this._removeAttributes(element, this.srcsetAttr, this.bgAttr)
 
     this.elements = this._getElements()
     this.elements.length === 0 && this._unbindEvents()
   }
 
   _update() {
+    this.windowWidth = window.innerWidth
     this.windowHeight = window.innerHeight
     this.elements.forEach(element => this._inViewport(element) && this._reveal(element))
 
