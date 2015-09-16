@@ -33,7 +33,7 @@
 
       // options
       this.selector = options.selector || '[data-layzr]';
-      this.defaultAttr = options.normalAttr || 'data-layzr';
+      this.normalAttr = options.normalAttr || 'data-layzr';
       this.retinaAttr = options.retinaAttr || 'data-layzr-retina';
       this.bgAttr = options.bgAttr || 'data-layzr-bg';
       this.threshold = options.threshold || 0;
@@ -139,7 +139,7 @@
 
         typeof this.callback === 'function' && this.callback.call(element);
 
-        this._removeAttributes(element, this.defaultAttr, this.retinaAttr, this.bgAttr);
+        this._removeAttributes(element, this.normalAttr, this.retinaAttr, this.bgAttr);
 
         this.elements = this._getElements();
         this.elements.length === 0 && this._unbindEvents();
