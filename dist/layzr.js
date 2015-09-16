@@ -33,7 +33,11 @@
 
       // options
       this.selector = options.selector || '[data-layzr]';
+      this.defaultAttr = options.normalAttr || 'data-layzr';
+      this.retinaAttr = options.retinaAttr || 'data-layzr-retina';
+      this.bgAttr = options.bgAttr || 'data-layzr-bg';
       this.threshold = options.threshold || 0;
+      this.callback = options.callback || null;
 
       // debounce
       this.prevLocation = 0;
@@ -116,13 +120,38 @@
         return elementOffset.top >= viewportTop - threshold && elementOffset.bottom <= viewportBottom + threshold;
       }
     }, {
+      key: '_removeAttributes',
+      value: function _removeAttributes(element) {
+        for (var _len = arguments.length, attributes = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          attributes[_key - 1] = arguments[_key];
+        }
+
+        attributes.forEach(function (attribute) {
+          return element.removeAttribute(attribute);
+        });
+      }
+    }, {
+      key: '_reveal',
+      value: function _reveal(element) {
+        var source = '';
+
+        element.hasAttribute(this.bgAttr) ? element.style.backgroundImage = 'url("' + source + ')' : element.setAttribute('src', source);
+
+        typeof this.callback === 'function' && this.callback.call(element);
+
+        this._removeAttributes(element, this.defaultAttr, this.retinaAttr, this.bgAttr);
+
+        this.elements = this._getElements();
+        this.elements.length === 0 && this._unbindEvents();
+      }
+    }, {
       key: '_update',
       value: function _update() {
         var _this3 = this;
 
         this.windowHeight = window.innerHeight;
         this.elements.forEach(function (element) {
-          return _this3._inViewport(element) && console.log('In viewport.');
+          return _this3._inViewport(element) && _this3._reveal(element);
         });
 
         this.ticking = false;

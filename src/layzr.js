@@ -4,7 +4,11 @@ export default class Layzr {
   constructor(options = {}) {
     // options
     this.selector = options.selector || '[data-layzr]'
+    this.defaultAttr = options.normalAttr || 'data-layzr'
+    this.retinaAttr = options.retinaAttr || 'data-layzr-retina'
+    this.bgAttr = options.bgAttr || 'data-layzr-bg'
     this.threshold = options.threshold || 0
+    this.callback = options.callback || null
 
     // debounce
     this.prevLocation = 0
@@ -73,9 +77,28 @@ export default class Layzr {
         && elementOffset.bottom <= viewportBottom + threshold
   }
 
+  _removeAttributes(element, ...attributes) {
+    attributes.forEach(attribute => element.removeAttribute(attribute))
+  }
+
+  _reveal(element) {
+    const source = '';
+
+    element.hasAttribute(this.bgAttr)
+      ? element.style.backgroundImage = 'url("' + source + ')'
+      : element.setAttribute('src', source)
+
+    typeof this.callback === 'function' && this.callback.call(element)
+
+    this._removeAttributes(element, this.defaultAttr, this.retinaAttr, this.bgAttr)
+
+    this.elements = this._getElements()
+    this.elements.length === 0 && this._unbindEvents()
+  }
+
   _update() {
     this.windowHeight = window.innerHeight
-    this.elements.forEach(element => this._inViewport(element) && console.log('In viewport.'))
+    this.elements.forEach(element => this._inViewport(element) && this._reveal(element))
 
     this.ticking = false
   }
