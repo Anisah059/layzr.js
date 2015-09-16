@@ -14,6 +14,9 @@ export default class Layzr {
     // events
     this.eventsBound = false
     this.eventHandler = () => this._requestLocation()
+
+    // pixel density
+    this.dpr = window.devicePixelRatio
   }
 
   run() {
@@ -75,8 +78,6 @@ export default class Layzr {
   }
 
   _getSource(element) {
-    const dpr = window.devicePixelRatio
-
     const candidates = element
       .getAttribute(this.srcsetAttr)
       .split(',')
@@ -91,8 +92,8 @@ export default class Layzr {
       return px / this.windowWidth
     })
 
-    const ideal = ratios.filter(ratio => ratio > dpr)
-    const fallback = ratios.filter(ratio => ratio < dpr)
+    const ideal = ratios.filter(ratio => ratio >= this.dpr)
+    const fallback = ratios.filter(ratio => ratio < this.dpr)
 
     const best = ideal.length === 0
       ? Math.max(...fallback)

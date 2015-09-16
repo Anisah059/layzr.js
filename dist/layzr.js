@@ -49,6 +49,9 @@
       this.eventHandler = function () {
         return _this._requestLocation();
       };
+
+      // pixel density
+      this.dpr = window.devicePixelRatio;
     }
 
     _createClass(Layzr, [{
@@ -125,8 +128,6 @@
       value: function _getSource(element) {
         var _this3 = this;
 
-        var dpr = window.devicePixelRatio;
-
         var candidates = element.getAttribute(this.srcsetAttr).split(',').map(function (candidate) {
           return candidate.trim();
         });
@@ -143,10 +144,10 @@
         });
 
         var ideal = ratios.filter(function (ratio) {
-          return ratio > dpr;
+          return ratio >= _this3.dpr;
         });
         var fallback = ratios.filter(function (ratio) {
-          return ratio < dpr;
+          return ratio < _this3.dpr;
         });
 
         var best = ideal.length === 0 ? Math.max.apply(Math, _toConsumableArray(fallback)) : Math.min.apply(Math, _toConsumableArray(ideal));
