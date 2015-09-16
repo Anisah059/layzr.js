@@ -91,60 +91,14 @@ export default class Layzr {
       return px / this.windowWidth
     })
 
-    const smaller = ratios.filter(ratio => ratio < dpr)
-    const larger = ratios.filter(ratio => ratio > dpr)
+    const ideal = ratios.filter(ratio => ratio > dpr)
+    const fallback = ratios.filter(ratio => ratio < dpr)
 
-    const best = larger.length > 0
-      ? sources[ratios.indexOf(Math.min(...larger))]
-      : sources[ratios.indexOf(Math.max(...smaller))]
+    const best = ideal.length === 0
+      ? Math.max(...fallback)
+      : Math.min(...ideal)
 
-    console.log(best)
-
-    // console.log(candidates)
-    // console.log(sources)
-    // console.log(ratios)
-
-    // const pairs   = element.getAttribute(attribute).split(', ')
-
-    // const sources = pairs.map(pair => pair.split(' ').shift())
-    // const sizes   = pairs.map(pair => parseInt(pair.split(' ').pop().slice(0, -1), 10))
-
-
-    // console.log(pairs)
-    // console.log(sources)
-    // console.log(sizes)
-
-    // const sources = raw.map((source) => {
-    //   const split = source.split(' ')
-
-    //   return [
-    //     split / this.windowWidth,
-    //     split.shift()
-    //   ]
-    // })
-
-    // const best = sources.reduce((test, source) => {
-
-    // }, 0)
-
-    // console.log(sources)
-
-    // const source = element
-    //   .getAttribute(this.normalAttr)
-    //   .split(', ')
-    //   .map((source) => {
-    //     const px = source.split(' ').pop()
-    //     return parseInt(px, 10)
-    //   })
-    //   .reduce((best, size, index) => {
-    //     const ratio = size / this.windowWidth
-
-    //     return ratio >= best
-    //       ? index
-    //       : best
-    //   }, 0)
-
-    // console.log(source)
+    return sources[ratios.indexOf(best)]
   }
 
   _removeAttributes(element, ...attributes) {

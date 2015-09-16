@@ -142,61 +142,16 @@
           return px / _this3.windowWidth;
         });
 
-        var smaller = ratios.filter(function (ratio) {
-          return ratio < dpr;
-        });
-        var larger = ratios.filter(function (ratio) {
+        var ideal = ratios.filter(function (ratio) {
           return ratio > dpr;
         });
+        var fallback = ratios.filter(function (ratio) {
+          return ratio < dpr;
+        });
 
-        var best = larger.length > 0 ? sources[ratios.indexOf(Math.min.apply(Math, _toConsumableArray(larger)))] : sources[ratios.indexOf(Math.max.apply(Math, _toConsumableArray(smaller)))];
+        var best = ideal.length === 0 ? Math.max.apply(Math, _toConsumableArray(fallback)) : Math.min.apply(Math, _toConsumableArray(ideal));
 
-        console.log(best);
-
-        // console.log(candidates)
-        // console.log(sources)
-        // console.log(ratios)
-
-        // const pairs   = element.getAttribute(attribute).split(', ')
-
-        // const sources = pairs.map(pair => pair.split(' ').shift())
-        // const sizes   = pairs.map(pair => parseInt(pair.split(' ').pop().slice(0, -1), 10))
-
-        // console.log(pairs)
-        // console.log(sources)
-        // console.log(sizes)
-
-        // const sources = raw.map((source) => {
-        //   const split = source.split(' ')
-
-        //   return [
-        //     split / this.windowWidth,
-        //     split.shift()
-        //   ]
-        // })
-
-        // const best = sources.reduce((test, source) => {
-
-        // }, 0)
-
-        // console.log(sources)
-
-        // const source = element
-        //   .getAttribute(this.normalAttr)
-        //   .split(', ')
-        //   .map((source) => {
-        //     const px = source.split(' ').pop()
-        //     return parseInt(px, 10)
-        //   })
-        //   .reduce((best, size, index) => {
-        //     const ratio = size / this.windowWidth
-
-        //     return ratio >= best
-        //       ? index
-        //       : best
-        //   }, 0)
-
-        // console.log(source)
+        return sources[ratios.indexOf(best)];
       }
     }, {
       key: '_removeAttributes',
