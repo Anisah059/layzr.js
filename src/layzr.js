@@ -8,7 +8,7 @@ export default class Layzr {
     this.retinaAttr = options.retinaAttr || 'data-layzr-retina'
     this.bgAttr = options.bgAttr || 'data-layzr-bg'
     this.threshold = options.threshold || 0
-    this.callback = options.callback || null
+    this.callback = options.callback || undefined
 
     // debounce
     this.prevLocation = 0
