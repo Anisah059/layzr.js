@@ -121,7 +121,7 @@
 
         var elementOffset = this._getOffset(element);
 
-        return elementOffset.top >= viewportTop - threshold && elementOffset.bottom <= viewportBottom + threshold;
+        return elementOffset.top <= viewportBottom + threshold && elementOffset.bottom >= viewportTop - threshold;
       }
     }, {
       key: '_getSource',
